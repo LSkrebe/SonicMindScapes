@@ -14,9 +14,22 @@ interface RedditAuthProps {
 const RedditAuth: React.FC<RedditAuthProps> = ({ onAuthenticated }) => {
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
+  const [redirectUri, setRedirectUri] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Set default redirect URI based on the current URL
+  useEffect(() => {
+    // Default to current origin (without path)
+    setRedirectUri(window.location.origin);
+    
+    // Check for stored redirect URI
+    const storedUri = localStorage.getItem('reddit_redirect_uri');
+    if (storedUri) {
+      setRedirectUri(storedUri);
+    }
+  }, []);
   
   // Check if we're returning from OAuth redirect
   useEffect(() => {
@@ -27,7 +40,8 @@ const RedditAuth: React.FC<RedditAuthProps> = ({ onAuthenticated }) => {
       exchangeCodeForToken(
         code, 
         localStorage.getItem('reddit_client_id') as string,
-        localStorage.getItem('reddit_client_secret') as string
+        localStorage.getItem('reddit_client_secret') as string,
+        localStorage.getItem('reddit_redirect_uri') as string
       );
     }
     
@@ -52,10 +66,10 @@ const RedditAuth: React.FC<RedditAuthProps> = ({ onAuthenticated }) => {
     // Store credentials for when we return from OAuth redirect
     localStorage.setItem('reddit_client_id', clientId);
     localStorage.setItem('reddit_client_secret', clientSecret);
+    localStorage.setItem('reddit_redirect_uri', redirectUri);
     
     // Reddit OAuth URL
     const redditAuthUrl = 'https://www.reddit.com/api/v1/authorize';
-    const redirectUri = window.location.origin;
     const scope = 'identity read history';
     const state = Math.random().toString(36).substring(2, 15);
     const duration = 'permanent';
@@ -65,14 +79,17 @@ const RedditAuth: React.FC<RedditAuthProps> = ({ onAuthenticated }) => {
     
     const authUrl = `${redditAuthUrl}?client_id=${clientId}&response_type=${responseType}&state=${state}&redirect_uri=${redirectUri}&duration=${duration}&scope=${scope}`;
     
+    console.log("Redirecting to:", authUrl);
+    
     // Redirect to Reddit for authorization
     window.location.href = authUrl;
   };
 
-  const exchangeCodeForToken = async (code: string, clientId: string, clientSecret: string) => {
+  const exchangeCodeForToken = async (code: string, clientId: string, clientSecret: string, redirectUri: string) => {
     try {
       setIsAuthenticating(true);
-      const redirectUri = window.location.origin;
+      
+      console.log("Exchanging code for token with redirect URI:", redirectUri);
       
       const tokenResponse = await fetch('https://www.reddit.com/api/v1/access_token', {
         method: 'POST',
@@ -88,7 +105,8 @@ const RedditAuth: React.FC<RedditAuthProps> = ({ onAuthenticated }) => {
       });
       
       if (!tokenResponse.ok) {
-        throw new Error('Failed to get access token');
+        const errorText = await tokenResponse.text();
+        throw new Error(`Failed to get access token: ${errorText}`);
       }
       
       const data = await tokenResponse.json();
@@ -122,6 +140,7 @@ const RedditAuth: React.FC<RedditAuthProps> = ({ onAuthenticated }) => {
     localStorage.removeItem('reddit_access_token');
     localStorage.removeItem('reddit_client_id');
     localStorage.removeItem('reddit_client_secret');
+    localStorage.removeItem('reddit_redirect_uri');
     setAuthToken(null);
     toast({
       title: "Logged Out",
@@ -170,6 +189,18 @@ const RedditAuth: React.FC<RedditAuthProps> = ({ onAuthenticated }) => {
             onChange={(e) => setClientSecret(e.target.value)}
             placeholder="Enter your Reddit Client Secret"
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="redirect-uri">Redirect URI</Label>
+          <Input
+            id="redirect-uri"
+            value={redirectUri}
+            onChange={(e) => setRedirectUri(e.target.value)}
+            placeholder="Enter the exact Redirect URI registered in your Reddit app"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            This must match exactly what you entered in Reddit's developer settings
+          </p>
         </div>
       </CardContent>
       <CardFooter>
