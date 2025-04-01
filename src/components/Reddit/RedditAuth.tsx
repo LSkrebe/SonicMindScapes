@@ -19,15 +19,6 @@ const RedditAuth: React.FC<RedditAuthProps> = ({ onAuthenticated }) => {
   const [authToken, setAuthToken] = useState<string | null>(null);
   const { toast } = useToast();
   
-  useEffect(() => {
-    console.log("Resetting local storage...");
-    localStorage.clear();
-    setClientId('');
-    setClientSecret('');
-    setRedirectUri(window.location.origin);
-    setAuthToken(null);
-  }, []);
-  
   // Set default redirect URI based on the current URL
   useEffect(() => {
     // Default to current origin (without path)
