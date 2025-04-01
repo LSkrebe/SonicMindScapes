@@ -70,7 +70,7 @@ const RedditAuth: React.FC<RedditAuthProps> = ({ onAuthenticated }) => {
     
     // Reddit OAuth URL
     const redditAuthUrl = 'https://www.reddit.com/api/v1/authorize';
-    const scope = 'identity read history';
+    const scope = 'identity read history mysubreddits';
     const state = Math.random().toString(36).substring(2, 15);
     const duration = 'permanent';
     const responseType = 'code';
