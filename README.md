@@ -5,7 +5,6 @@ SonicMindScapes is an innovative project that uses generative audio to create dy
 ## Features
 - Real-time Audio Generation: Creates unique soundscapes on the fly.
 - Modular Architecture: Easily integrate new sound modules and generation algorithms.
-- Python-based: Leverages the power and flexibility of Python for audio synthesis and control.
 - Cross-platform: Designed to run on various operating systems.
 
 ## UI Preview
