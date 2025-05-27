@@ -1,4 +1,12 @@
-# Binaural Beats Generator app
+# SonicMindScapes: Generative Audio for Immersive Environments
+
+SonicMindScapes is an innovative project that uses generative audio to create dynamic and immersive soundscapes. The core idea is to move beyond static, pre-recorded audio by generating sounds in real-time based on environmental or interactive data. This allows for truly responsive and adaptive auditory experiences.
+
+## Features
+- Real-time Audio Generation: Creates unique soundscapes on the fly.
+- Modular Architecture: Easily integrate new sound modules and generation algorithms.
+- Python-based: Leverages the power and flexibility of Python for audio synthesis and control.
+- Cross-platform: Designed to run on various operating systems.
 
 ## UI Preview
 
